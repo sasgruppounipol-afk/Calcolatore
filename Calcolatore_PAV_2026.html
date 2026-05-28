@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Calcolatore PAV 2026 – First CISL Gruppo Unipol</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f2f5f3;min-height:100vh;padding:20px 14px 40px;color:#1a1a1a}
+.wrap{max-width:660px;margin:0 auto}
+.header{background:linear-gradient(135deg,#1a6e2e,#145a24);color:#fff;border-radius:10px 10px 0 0;padding:18px 22px 14px}
+.header .org{font-size:10pt;opacity:.8;margin-bottom:3px}
+.header h1{font-size:17pt;font-weight:700}
+.header .sub{font-size:8pt;opacity:.7;margin-top:5px}
+.card{background:#fff;border:1px solid #dde8e0;border-top:none;border-radius:0 0 10px 10px;padding:20px 22px}
+.tabs{display:flex;border-bottom:2px solid #dde8e0;margin-bottom:18px}
+.tab{padding:8px 18px;border:none;background:none;cursor:pointer;font-size:10.5pt;
+     font-family:Arial;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tab.on{color:#1a6e2e;font-weight:700;border-bottom-color:#1a6e2e}
+.panel{display:none}.panel.on{display:block}
+
+/* --- CALC PANEL --- */
+.mode-row{display:flex;gap:8px;margin-bottom:16px}
+.mbtn{flex:1;padding:8px 4px;border-radius:6px;border:2px solid #ccc;background:#fafafa;
+      color:#555;font-size:10pt;font-family:Arial;cursor:pointer;transition:all .15s}
+.mbtn.on{border-color:#1a6e2e;background:#f0f7f2;color:#1a6e2e;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.full{grid-column:1/-1}
+.lbl{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+     color:#555;display:block;margin-bottom:4px}
+select,input[type=number]{width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #ccc;
+  font-size:10.5pt;font-family:Arial;background:#fafafa;transition:border-color .15s}
+select:focus,input:focus{outline:none;border-color:#1a6e2e}
+.chkrow{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:10pt;user-select:none}
+.chkrow input{width:17px;height:17px;accent-color:#1a6e2e;cursor:pointer}
+.pavbase{display:flex;justify-content:space-between;align-items:center;
+         background:#f2f5f3;border-radius:8px;padding:10px 14px;margin-bottom:16px}
+.pavbase .l{font-size:10pt;color:#444}
+.pavbase .v{font-size:19pt;font-weight:800}
+.results{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px}
+.rc{border-radius:9px;padding:13px 10px;text-align:center}
+.rc .ico{font-size:17px;margin-bottom:4px}
+.rc .rl{font-size:7.5pt;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:6px}
+.rc .rv{font-size:19pt;font-weight:800;margin-bottom:2px;line-height:1}
+.rc .rs{font-size:7pt;color:#777;line-height:1.5}
+.rcb{border:2px solid #ddd} .rcb .rl{color:#666} .rcb .rv{color:#c0392b}
+.rcw{border:2px solid #1a6e2e;background:#f0f7f2} .rcw .rl{color:#1a6e2e} .rcw .rv{color:#1a6e2e}
+.rcf{border:2px solid #2471a3;background:#eaf4fb} .rcf .rl{color:#2471a3} .rcf .rv{color:#2471a3}
+.disc{font-size:7pt;color:#aaa;line-height:1.5;border-top:1px solid #eee;padding-top:8px}
+
+/* --- FB PANEL --- */
+.fb-intro{font-size:10pt;color:#444;line-height:1.6;margin-bottom:16px}
+.fb-section{margin-bottom:14px}
+.fb-section .lbl{margin-bottom:6px}
+.soglia-btns{display:flex;gap:8px;margin-bottom:16px}
+.sbtn{flex:1;padding:9px;border-radius:6px;border:2px solid #ccc;background:#fafafa;
+      color:#555;font-size:10.5pt;font-family:Arial;cursor:pointer;transition:all .15s;font-weight:400}
+.sbtn.on{border-color:#1a6e2e;background:#f0f7f2;color:#1a6e2e;font-weight:700}
+.fb-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.meter-wrap{background:#f0f5f1;border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.meter-label{font-size:9pt;color:#444;margin-bottom:8px}
+.meter-bar-bg{background:#dde;border-radius:6px;height:14px;overflow:hidden;margin-bottom:4px}
+.meter-bar{height:100%;border-radius:6px;transition:width .3s}
+.meter-nums{display:flex;justify-content:space-between;font-size:8pt;color:#666}
+.result-box{border-radius:8px;padding:14px 16px;border:2px solid #1a6e2e;background:#f0f7f2;margin-bottom:10px}
+.result-box h3{font-size:10pt;color:#1a6e2e;margin-bottom:8px}
+.result-box .ritem{display:flex;justify-content:space-between;align-items:baseline;
+                   padding:4px 0;border-bottom:1px solid #d5eadb;font-size:9.5pt}
+.result-box .ritem:last-child{border:none;font-weight:700;font-size:10.5pt;padding-top:8px}
+.result-box .ritem .rv2{font-weight:700;color:#1a6e2e}
+.warn-box{background:#fff8e1;border-left:3px solid #e67e00;padding:9px 12px;
+          font-size:8.5pt;line-height:1.5;color:#555;border-radius:0 6px 6px 0;margin-bottom:10px}
+.warn-box.red{background:#fdf2f2;border-color:#c0392b;color:#700}
+
+.footer{text-align:center;margin-top:14px;font-size:8pt;color:#888}
+.footer a{color:#1a6e2e}
+@media(max-width:480px){
+  .results,.g2,.fb-row{grid-template-columns:1fr}
+  .rc .rv{font-size:21pt}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="header">
+  <div class="org">First CISL Gruppo Unipol</div>
+  <h1>Calcolatore PAV 2026</h1>
+  <div class="sub">Busta paga &nbsp;|&nbsp; Welfare (+26,86%) &nbsp;|&nbsp; Fondo Pensione (+15,33%) &nbsp;|&nbsp; Ottimizzatore Fringe Benefit</div>
+</div>
+<div class="card">
+
+  <div class="tabs">
+    <button class="tab on" onclick="showTab('calc',this)">🧮 Calcola importi</button>
+    <button class="tab"    onclick="showTab('fb',this)">🎁 Ottimizza Fringe Benefit</button>
+  </div>
+
+  <!-- ══════════════ PANNELLO CALCOLO ══════════════ -->
+  <div id="panel-calc" class="panel on">
+
+    <div class="mode-row">
+      <button class="mbtn on" id="bl" onclick="setMode('liv')">Per livello contrattuale</button>
+      <button class="mbtn"    id="bm" onclick="setMode('man')">Importo libero</button>
+    </div>
+
+    <div id="inp-liv">
+      <div class="g2">
+        <div>
+          <label class="lbl">Livello contrattuale</label>
+          <select id="sel-liv" onchange="calc()">
+            <option value="1000">Livello 1</option>
+            <option value="1100">Livello 2</option>
+            <option value="1300">Livello 3</option>
+            <option value="1500" selected>Livello 4</option>
+            <option value="1700">Livello 5</option>
+            <option value="2000">Livello 6 – 6q</option>
+            <option value="2300">Funzionario Business</option>
+            <option value="2700">Funz. Business (ex F2)</option>
+            <option value="3000">Funzionario Senior</option>
+          </select>
+        </div>
+        <div>
+          <label class="lbl">Orario di lavoro</label>
+          <select id="sel-ore" onchange="calc()">
+            <option value="1" selected>Full Time (37h)</option>
+            <option value="0.8108">30h</option>
+            <option value="0.7838">29h</option>
+            <option value="0.7568">28h</option>
+            <option value="0.7297">27h</option>
+            <option value="0.6757">25h</option>
+            <option value="0.6486">24h</option>
+            <option value="0.6081">22,5h</option>
+            <option value="0.5405">20h</option>
+          </select>
+        </div>
+        <div class="full">
+          <label class="chkrow">
+            <input type="checkbox" id="chk-agg" onchange="calc()"/>
+            <span>Include <b>importo aggiuntivo</b> (obiettivi individuali raggiunti)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div id="inp-man" style="display:none;margin-bottom:14px">
+      <label class="lbl">Importo PAV lordo (€)</label>
+      <input type="number" id="inp-val" placeholder="es. 1500" min="0" oninput="calc()" style="max-width:260px"/>
+    </div>
+
+    <div class="pavbase">
+      <span class="l">PAV lordo di riferimento</span>
+      <span class="v" id="pav-show">1.500 €</span>
+    </div>
+
+    <div class="results">
+      <div class="rc rcb">
+        <div class="ico">💳</div>
+        <div class="rl">Busta paga</div>
+        <div class="rv" id="r-busta">1.335 €</div>
+        <div class="rs">netto approx.<br/>–1% IRPEF sub.<br/>–~10% INPS dip.°</div>
+      </div>
+      <div class="rc rcw">
+        <div class="ico">🎁</div>
+        <div class="rl">Welfare</div>
+        <div class="rv" id="r-welfare">1.903 €</div>
+        <div class="rs">credito netto<br/>+26,86% sul lordo<br/>esente IRPEF e INPS</div>
+      </div>
+      <div class="rc rcf">
+        <div class="ico">🏦</div>
+        <div class="rl">Fondo Pensione</div>
+        <div class="rv" id="r-fondo">1.730 €</div>
+        <div class="rs">versato al fondo<br/>+15,33% sul lordo<br/>esente IRPEF e INPS</div>
+      </div>
+    </div>
+
+    <div class="disc">
+      ° L'aliquota INPS dipendente (~10%) è indicativa e può variare in base alla posizione contributiva individuale.
+      Importi arrotondati all'intero più vicino. Riparametrazione su 37h settimanali (CCNL ANIA).
+      Call Center = Liv. 3; Team Leader C.C. = Liv. 5 (dal 2022).
+      Per i valori ufficiali: COM/UNP/CHRO/14-2026.
+    </div>
+  </div>
+
+  <!-- ══════════════ PANNELLO FRINGE BENEFIT ══════════════ -->
+  <div id="panel-fb" class="panel">
+    <p class="fb-intro">
+      Inserisci i benefit imponibili già ricevuti o attesi nel 2026 per scoprire
+      <b>quanta parte del PAV conviene convertire in welfare Fringe Benefit</b>
+      (utenze, buoni spesa, ecc.) senza superare la soglia di esenzione.
+    </p>
+
+    <div style="margin-bottom:12px">
+      <label class="lbl">Soglia Fringe Benefit applicabile</label>
+      <div class="soglia-btns">
+        <button class="sbtn on" id="s1000" onclick="setSoglia(1000,this)">€ 1.000 — tutti i lavoratori</button>
+        <button class="sbtn"    id="s2000" onclick="setSoglia(2000,this)">€ 2.000 — con figli a carico</button>
+      </div>
+    </div>
+
+    <div class="fb-row">
+      <div>
+        <label class="lbl">Una tantum CCNL ANIA (€)</label>
+        <input type="number" id="fb-ccnl" placeholder="inserisci importo" min="0" oninput="calcFB()" style=""/>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <div style="width:100%;background:#f0f7f2;border:1.5px solid #1a6e2e;border-radius:6px;
+                    padding:8px 10px;font-size:10.5pt;color:#1a6e2e;font-weight:700">
+          Ex buoni CadHoc: <b>€ 60</b> <span style="font-weight:400;font-size:9pt">(fissi)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="fb-section">
+      <label class="lbl">Altri benefit aziendali imponibili 2026 (€) <span style="font-weight:400;text-transform:none;letter-spacing:0">(polizze, auto, foresteria, premi concorsi…)</span></label>
+      <input type="number" id="fb-altri" placeholder="0 se nessuno" min="0" oninput="calcFB()" style="max-width:260px"/>
+    </div>
+
+    <div class="meter-wrap" id="meter-wrap">
+      <div class="meter-label">Spazio Fringe Benefit già occupato: <b id="metro-txt">– / –</b></div>
+      <div class="meter-bar-bg"><div class="meter-bar" id="meter-bar" style="width:0%;background:#1a6e2e"></div></div>
+      <div class="meter-nums"><span>0 €</span><span id="soglia-label">1.000 €</span></div>
+    </div>
+
+    <div id="fb-result" style="display:none">
+      <div class="result-box">
+        <h3>💡 Suggerimento: PAV da convertire in welfare Fringe Benefit</h3>
+        <div class="ritem"><span>Soglia applicabile</span><span class="rv2" id="r-soglia">—</span></div>
+        <div class="ritem"><span>Una tantum CCNL</span><span id="r-ccnl">—</span></div>
+        <div class="ritem"><span>Ex buoni CadHoc</span><span>– 60 €</span></div>
+        <div class="ritem" id="row-altri" style="display:none"><span>Altri benefit</span><span id="r-altri">—</span></div>
+        <div class="ritem"><span>Spazio residuo per welfare FB</span><span class="rv2" id="r-spazio">—</span></div>
+        <div class="ritem"><span>PAV lordo da versare in welfare°°</span><span class="rv2" id="r-pav-fb">—</span></div>
+        <div class="ritem"><span>Credito welfare ottenuto (+26,86%)</span><span class="rv2" id="r-credito">—</span></div>
+      </div>
+      <div id="warn-ok"  class="warn-box" style="display:none">✅ Nessun benefit imponibile ancora registrato: puoi convertire fino a <b id="warn-max">—</b> di PAV in welfare Fringe Benefit.</div>
+      <div id="warn-over" class="warn-box red" style="display:none">⚠️ La soglia è già superata dai benefit esistenti (<b id="warn-tot">—</b>). Eventuali ulteriori benefit imponibili sarebbero tassati sull'intero importo.</div>
+      <div id="warn-saturata" class="warn-box red" style="display:none">⚠️ La soglia è già saturata. Non conviene aggiungere altri Fringe Benefit: qualsiasi importo aggiuntivo renderebbe imponibile l'intero cumulo.</div>
+    </div>
+    <div class="disc" style="margin-top:8px">
+      °° La conversione di PAV in welfare Fringe Benefit è conveniente solo se si ha effettivamente una spesa imponibile da rimborsare (utenze, buoni spesa, ecc.). Le spese ex art. 51 co.2 TUIR (istruzione, assistenza familiari, trasporto) non rientrano nel conteggio Fringe Benefit e possono essere rimborsate senza limiti.
+    </div>
+  </div>
+
+</div><!-- /card -->
+<div class="footer">
+  First CISL Gruppo Unipol &nbsp;·&nbsp;
+  <a href="https://www.firstcisl.it/gruppounipol/" target="_blank">www.firstcisl.it/gruppounipol</a>
+  &nbsp;·&nbsp; Valori arrotondati all'intero più vicino – a titolo orientativo
+</div>
+</div>
+
+<script>
+const AGG={1000:1233,1100:1357,1300:1603,1500:1850,1700:2097,2000:2467,2300:2837,2700:3330,3000:3700};
+let mode='liv', soglia=1000;
+
+function fmt(n){return Math.round(n).toLocaleString('it-IT')+' €'}
+
+function showTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('panel-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('inp-liv').style.display=m==='liv'?'':'none';
+  document.getElementById('inp-man').style.display=m==='man'?'':'none';
+  document.getElementById('bl').classList.toggle('on',m==='liv');
+  document.getElementById('bm').classList.toggle('on',m==='man');
+  calc();
+}
+
+function getPAV(){
+  if(mode==='liv'){
+    const base=parseFloat(document.getElementById('sel-liv').value);
+    const coeff=parseFloat(document.getElementById('sel-ore').value);
+    const agg=document.getElementById('chk-agg').checked;
+    return (agg?AGG[base]:base)*coeff;
+  }
+  return parseFloat(document.getElementById('inp-val').value)||0;
+}
+
+function calc(){
+  const pav=getPAV();
+  document.getElementById('pav-show').textContent=fmt(pav);
+  // INPS ~10% + IRPEF 1% = 11% totale → netto 89%
+  document.getElementById('r-busta').textContent=fmt(pav*0.89);
+  document.getElementById('r-welfare').textContent=fmt(pav*1.2686);
+  document.getElementById('r-fondo').textContent=fmt(pav*1.1533);
+}
+
+function setSoglia(v,btn){
+  soglia=v;
+  document.getElementById('s1000').classList.toggle('on',v===1000);
+  document.getElementById('s2000').classList.toggle('on',v===2000);
+  document.getElementById('soglia-label').textContent=fmt(v);
+  calcFB();
+}
+
+function calcFB(){
+  const ccnl=parseFloat(document.getElementById('fb-ccnl').value)||0;
+  const altri=parseFloat(document.getElementById('fb-altri').value)||0;
+  const cadhoc=60;
+  const gia=ccnl+cadhoc+altri;
+  const spazio=Math.max(0,soglia-gia);
+  // PAV da versare = spazio/1.2686 (così il credito ottenuto = spazio esatto)
+  const pavFB=spazio/1.2686;
+  const credito=pavFB*1.2686; // = spazio
+
+  // meter
+  const pct=Math.min(100,gia/soglia*100);
+  const bar=document.getElementById('meter-bar');
+  bar.style.width=pct+'%';
+  bar.style.background=pct>=100?'#c0392b':pct>=80?'#e67e00':'#1a6e2e';
+  document.getElementById('metro-txt').textContent=fmt(gia)+' / '+fmt(soglia);
+  document.getElementById('soglia-label').textContent=fmt(soglia);
+
+  // result box
+  document.getElementById('fb-result').style.display='block';
+  document.getElementById('r-soglia').textContent=fmt(soglia);
+  document.getElementById('r-ccnl').textContent='– '+fmt(ccnl);
+  document.getElementById('r-spazio').textContent=fmt(spazio);
+  document.getElementById('r-pav-fb').textContent=spazio>0?fmt(pavFB):'—';
+  document.getElementById('r-credito').textContent=spazio>0?fmt(credito):'—';
+  const rowAltri=document.getElementById('row-altri');
+  if(altri>0){rowAltri.style.display='flex';document.getElementById('r-altri').textContent='– '+fmt(altri);}
+  else{rowAltri.style.display='none';}
+
+  // warnings
+  document.getElementById('warn-ok').style.display='none';
+  document.getElementById('warn-over').style.display='none';
+  document.getElementById('warn-saturata').style.display='none';
+
+  if(gia===0){
+    document.getElementById('warn-ok').style.display='block';
+    document.getElementById('warn-max').textContent=fmt(pavFB);
+  } else if(gia>=soglia){
+    document.getElementById('warn-saturata').style.display='block';
+  } else if(pct>=80){
+    // nessun warning specifico, il meter parla
+  }
+  if(gia>soglia){
+    document.getElementById('warn-over').style.display='block';
+    document.getElementById('warn-tot').textContent=fmt(gia);
+    document.getElementById('warn-saturata').style.display='none';
+  }
+}
+
+calc();
+</script>
+</body>
+</html>
